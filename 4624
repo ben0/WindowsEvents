@@ -1,0 +1,30 @@
+$end = ([datetime]::Now).AddMinutes(-1)
+$start = ([datetime]::Now).AddHours(-24)
+Get-WinEvent -FilterHashTable @{ LogName = "Security"; StartTime = $start; EndTime = $end; ID = 4624 } | Select-Object `
+Id,`
+TimeCreated,`
+ProviderName,`
+TaskDisplayName,`
+@{n="Security ID:";e = {(($_.message -split "\n") | Select-String -Pattern "Security ID:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Account Name:";e = {(($_.message -split "\n") | Select-String -Pattern "Account Name:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Account Domain:";e = {(($_.message -split "\n") | Select-String -Pattern "Account Domain:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Logon Type:";e = {(($_.message -split "\n") | Select-String -Pattern "Logon Type:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Restricted Admin Mode:";e = {(($_.message -split "\n") | Select-String -Pattern "Restricted Admin Mode:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Virtual Account:";e = {(($_.message -split "\n") | Select-String -Pattern "Virtual Account:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Elevated Token:";e = {(($_.message -split "\n") | Select-String -Pattern "Elevated Token:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Impersonation Level:";e = {(($_.message -split "\n") | Select-String -Pattern "Impersonation Level:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Logon ID:";e = {(($_.message -split "\n") | Select-String -Pattern "Logon ID:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Linked Logon ID:";e = {(($_.message -split "\n") | Select-String -Pattern "Linked Logon ID:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Network Account Name:";e = {(($_.message -split "\n") | Select-String -Pattern "Network Account Name:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Network Account Domain:";e = {(($_.message -split "\n") | Select-String -Pattern "Network Account Domain:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Logon GUID:";e = {(($_.message -split "\n") | Select-String -Pattern "Logon GUID:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Process ID:";e = {(($_.message -split "\n") | Select-String -Pattern "Process ID:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Process Name:";e = {(($_.message -split "\n") | Select-String -Pattern "Process Name:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Workstation Name:";e = {(($_.message -split "\n") | Select-String -Pattern "Workstation Name:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Source Network Address:";e = {(($_.message -split "\n") | Select-String -Pattern "Source Network Address:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Source Port:";e = {(($_.message -split "\n") | Select-String -Pattern "Source Port:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Logon process:";e = {(($_.message -split "\n") | Select-String -Pattern "Logon Process:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Authentication Package:";e = {(($_.message -split "\n") | Select-String -Pattern "Authentication Package:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Transited Services:";e = {(($_.message -split "\n") | Select-String -Pattern "Transited Services:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Package Name (NTLM Only):";e = {(($_.message -split "\n") | Select-String -Pattern "Package Name (NTLM Only):\s+(.+)").matches[0].groups[1].value}},`
+@{n="Key Length:";e = {(($_.message -split "\n") | Select-String -Pattern "Key Length:\s+(.+)").matches[0].groups[1].value}}
