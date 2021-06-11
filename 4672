@@ -1,0 +1,12 @@
+$end = ([datetime]::Now).AddMinutes(-1)
+$start = ([datetime]::Now).AddHours(-24)
+Get-WinEvent -FilterHashTable @{ LogName = "Security"; StartTime = $start; EndTime = $end; ID = 4672 } | Select-Object `
+Id,`
+TimeCreated,`
+ProviderName,`
+TaskDisplayName,`
+@{n="Security ID:";e = {(($_.message -split "\n") | Select-String -Pattern "Security ID:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Account Name:";e = {(($_.message -split "\n") | Select-String -Pattern "Account Name:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Account Domain:";e = {(($_.message -split "\n") | Select-String -Pattern "Account Domain:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Logon ID:";e = {(($_.message -split "\n") | Select-String -Pattern "Logon ID:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Privileges:";e = {(($_.message -split "Privileges:")[1]).Replace(" ","")}}
