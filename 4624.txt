@@ -27,7 +27,6 @@ Function Get-LogonTypeHint
 
     Process
     {
-        Write-Host $id
         switch ( [int]$id )
         {
             2 { $result = '(2) Interactive (also known as, Logon locally) using Password or Smartcard. Creds are re-usable (LSA), you might see this with Console logon; RUNAS; or IIS Basic Auth.'   }
@@ -38,7 +37,6 @@ Function Get-LogonTypeHint
             9 { $result = '(9) NewCredentials, using Password, creds are stored in LSA, you might see this with RUNAS /NETWORK.'   }
             10 { $result = '(10) RemoteInteractive, using Password or Smartcard, Creds are stored in LSA, you might see this with Remote Desktop connections.'   }
         }
-        Write-Host $result
         Write-Output $result
     }
 }
