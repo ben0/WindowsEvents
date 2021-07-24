@@ -1,0 +1,69 @@
+Function Get-LogonTypeHint
+{
+    <#
+    .SYNOPSIS
+        Resolves the logon type ID to a name / test.
+
+    .NOTES
+        Name: Get-LogonTypeHint 
+        Author: James Benson
+        Version: 1.0
+        DateCreated: 2021 June 13
+
+    .EXAMPLE
+        Get-LogonTypeHint -id 3
+
+    #>
+
+    [CmdletBinding()]
+    param(
+        [Parameter(
+            Mandatory = $true,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 0
+            )][string] $id
+    )
+
+    Process
+    {
+        switch ( [int]$id )
+        {
+            2 { $result = '(2) Interactive (also known as, Logon locally) using Password or Smartcard. Creds are re-usable (LSA), you might see this with Console logon; RUNAS; or IIS Basic Auth.'   }
+            3 { $result = '(3) Network, using Password, NT Hash or Kerberos ticket. Creds are not reusable (No LSA - except if delegation is enabled, you might see this with NET USE; RPC calls, Remote registry, IIS integrated Windows auth or SQL Windows auth.'   }
+            4 { $result = '(4) Batch, using Password (stored as LSA secret), you might see this with a Scheduled tasks.'   }
+            5 { $result = '(5) Service, using Password (stored as LSA secret), you might see this with a Windows services'   }
+            8 { $result = '(8) NetworkCleartext, using Password, Creds are re-usable, you might see this with IIS Basic Auth (IIS 6.0 and newer) or Windows PowerShell with CredSSP.'   }
+            9 { $result = '(9) NewCredentials, using Password, creds are stored in LSA, you might see this with RUNAS /NETWORK.'   }
+            10 { $result = '(10) RemoteInteractive, using Password or Smartcard, Creds are stored in LSA, you might see this with Remote Desktop connections.'   }
+        }
+        Write-Output $result
+    }
+}
+
+$end = ([datetime]::Now).AddMinutes(-1)
+$start = ([datetime]::Now).AddHours(-24)
+Get-WinEvent -FilterHashTable @{ LogName = "Security"; StartTime = $start; EndTime = $end; ID = 4625 } | Select-Object `
+Id,`
+TimeCreated,`
+ProviderName,`
+TaskDisplayName,`
+@{n="Security ID:";e = {(($_.message -split "\n") | Select-String -Pattern "Security ID:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Account Name:";e = {(($_.message -split "\n") | Select-String -Pattern "Account Name:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Account Domain:";e = {(($_.message -split "\n") | Select-String -Pattern "Account Domain:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Logon Type:";e = {Get-LogonTypeHint -Id ((($_.message -split "\n") | Select-String -Pattern "Logon Type:\s+(.+)").matches[0].groups[1].value)}},`
+@{n="Logon ID:";e = {(($_.message -split "\n") | Select-String -Pattern "Logon ID:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Failure Reason:";e = {(($_.message -split "\n") | Select-String -Pattern "Failure Reason:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Status:";e = {(($_.message -split "\n") | Select-String -Pattern "Status:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Sub Status:";e = {(($_.message -split "\n") | Select-String -Pattern "Sub Status:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Linked Logon ID:";e = {(($_.message -split "\n") | Select-String -Pattern "Linked Logon ID:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Caller Process ID:";e = {(($_.message -split "\n") | Select-String -Pattern "Caller Process ID:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Caller Process Name:";e = {(($_.message -split "\n") | Select-String -Pattern "Caller Process Name:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Workstation Name:";e = {(($_.message -split "\n") | Select-String -Pattern "Workstation Name:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Source Network Address:";e = {(($_.message -split "\n") | Select-String -Pattern "Source Network Address:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Source Port:";e = {(($_.message -split "\n") | Select-String -Pattern "Source Port:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Logon process:";e = {(($_.message -split "\n") | Select-String -Pattern "Logon Process:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Authentication Package:";e = {(($_.message -split "\n") | Select-String -Pattern "Authentication Package:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Transited Services:";e = {(($_.message -split "\n") | Select-String -Pattern "Transited Services:\s+(.+)").matches[0].groups[1].value}},`
+@{n="Package Name (NTLM Only):";e = {(($_.message -split "\n") | Select-String -Pattern "Package Name (NTLM Only):\s+(.+)").matches[0].groups[1].value}},`
+@{n="Key Length:";e = {(($_.message -split "\n") | Select-String -Pattern "Key Length:\s+(.+)").matches[0].groups[1].value}}
